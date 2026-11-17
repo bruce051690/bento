@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>科內訂便當</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://script.google.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --card:#fff; --ink:#2b2622; --muted:#7a716a; --line:#e6dfd6;
+  --brand:#c2562e; --brand-soft:#fbe9e1;
+  --ok:#2f7d4f; --ok-soft:#e3f2e8; --warn:#a76a00; --warn-soft:#fdf1d8;
+  --bad:#b3261e; --bad-soft:#fbe4e2; --info:#2c5f9e; --info-soft:#e3edf9;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+a{color:var(--brand)}
+.demo{background:#2b2622;color:#fff;font-size:12px;padding:8px 12px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.demo button{font:inherit;border:1px solid #6b625b;background:transparent;color:#fff;border-radius:999px;padding:4px 10px;cursor:pointer}
+.demo .sp{flex:1}
+header{background:var(--brand);color:#fff;padding:16px}
+header h1{margin:0;font-size:19px}
+.sub{font-size:13px;opacity:.92;margin-top:4px;white-space:pre-line}
+main{max-width:640px;margin:0 auto;padding:14px 12px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 10px}
+.card h3{font-size:14px;margin:14px 0 6px;color:var(--muted);font-weight:500}
+.step{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;margin-right:6px;vertical-align:1px}
+.row{display:flex;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}
+input[type=text],input[type=number],input[type=time],input[type=password],textarea,select{font:inherit;width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+input:disabled{background:#f3f0ec;color:var(--muted)}
+input.err{border-color:var(--bad);background:var(--bad-soft)}
+label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+label.chk{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:15px;cursor:pointer}
+label.chk input{width:20px;height:20px;accent-color:var(--brand)}
+.req{color:var(--bad)}
+.btn{font:inherit;font-weight:500;border:none;border-radius:10px;padding:11px 14px;cursor:pointer;background:var(--brand);color:#fff}
+.btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.btn.danger{background:var(--bad)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn.full{width:100%}
+.btn.big{padding:14px 18px;font-size:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.item-row{display:grid;grid-template-columns:1fr 96px 36px;gap:6px;margin-bottom:8px}
+.drink{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px;background:#faf8f5}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chips.missing .chip{border-color:var(--bad)}
+.photos{display:grid;gap:8px;margin:4px 0 12px}
+.photos img{width:100%;max-height:65vh;object-fit:contain;background:#faf8f5;border-radius:10px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.photo-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:-4px}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumb{position:relative;width:92px;height:92px}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.thumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:none;background:var(--bad);color:#fff;cursor:pointer;font-size:14px;line-height:1}
+.addphoto{width:92px;height:92px;border:2px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:12px;cursor:pointer;text-align:center}
+.addphoto b{font-size:22px;color:var(--brand)}
+.total{font-size:22px;font-weight:700;color:var(--brand)}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;font:inherit;padding:10px;border:none;background:#fff;cursor:pointer;color:var(--muted)}
+.seg button.on{background:var(--brand);color:#fff;font-weight:500}
+.note-preview{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--info-soft);color:var(--info);font-weight:500}
+.hint{margin-top:6px;font-size:13px;color:var(--warn)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;font-weight:500}
+.t-bad{background:var(--bad-soft);color:var(--bad)} .t-warn{background:var(--warn-soft);color:var(--warn)}
+.t-info{background:var(--info-soft);color:var(--info)} .t-ok{background:var(--ok-soft);color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:12px}
+.num{text-align:right}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:20px} .stat small{color:var(--muted);font-size:12px}
+.copybox{white-space:pre-wrap;word-break:break-all;background:#faf8f5;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;margin:8px 0}
+.x{border:none;background:var(--bad-soft);color:var(--bad);border-radius:8px;cursor:pointer;font-size:16px;min-width:32px;min-height:32px}
+.person{padding:10px 0;border-bottom:1px solid var(--line)}
+.person:last-child{border-bottom:none}
+.items{font-size:13px;color:var(--muted)}
+.banner{background:var(--warn-soft);color:var(--warn);padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:12px}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.big-emoji{font-size:44px}
+.sticky{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);margin:12px -14px -14px;padding:12px 14px;border-radius:0 0 14px 14px;z-index:2}
+.foot{text-align:center;font-size:13px;margin-top:24px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2b2622;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:s 1s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes s{to{transform:rotate(360deg)}}
+.viewer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:20;overflow:auto;display:none}
+.viewer.show{display:block}
+.viewer img{width:100%;display:block;margin:48px auto 0;max-width:1200px}
+.viewer button{position:fixed;top:10px;right:10px;font:inherit;background:#fff;border:none;border-radius:999px;padding:8px 14px;cursor:pointer;z-index:21}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="demoBar" class="demo hidden">
+  <b>示範模式</b><span>資料只存在這台裝置，尚未連接 Google 試算表</span><span class="sp"></span>
+  <button data-demo="order">點餐頁</button><button data-demo="admin">負責人後台</button>
+  <button data-demo="next">⏭ 模擬隔天</button><button data-demo="clear">清除資料</button>
+</div>
+<header><h1 id="hTitle">🍱 訂便當</h1><div class="sub" id="hSub"></div></header>
+<main id="main"><div class="empty">載入中…</div></main>
+<div class="viewer" id="viewer"><button>✕ 關閉</button><img id="viewerImg" alt="菜單"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+ * 設定：把 Apps Script 部署後的「網頁應用程式網址」貼在這裡
+ * 留空 = 示範模式（資料只存在自己的瀏覽器，方便先試用）
+ * ========================================================= */
+const API_URL = "";
+
+const SUGAR = ["正常糖","少糖","半糖","微糖","一分糖","無糖"];
+const ICE = ["正常冰","少冰","微冰","去冰","溫","熱"];
+const SHIFTS = ["白班","小夜班","大夜班"];
+const DAY_START_HOUR = 4; // 系統的「一天」從凌晨 4 點開始算（和 Code.gs 一致）
+const DEMO = !API_URL;
+
+// ---------- 小工具 ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => "$" + Number(n || 0).toLocaleString();
+const pad = n => String(n).padStart(2, "0");
+const hm = d => pad(d.getHours()) + ":" + pad(d.getMinutes());
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+function fmtDate(s){ if(!s) return ""; const [y,m,d] = s.split("-").map(Number); const dt = new Date(y, m-1, d); return `${m}/${d}（${"日一二三四五六"[dt.getDay()]}）`; }
+function toast(m){ const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+async function copy(text){ try{ await navigator.clipboard.writeText(text); toast("已複製，可以貼到 LINE"); }catch(e){ toast("無法自動複製，請長按文字手動複製"); } }
+function keepScroll(fn){ const y = window.scrollY; fn(); window.scrollTo(0, y); }
+function setMain(h){ $("#main").innerHTML = h; }
+function setHeader(t, s){ $("#hTitle").textContent = t; $("#hSub").textContent = s || ""; }
+function defaultDeadline(type){
+  const d = new Date(Date.now() + (type === "drink" ? 3 : 2) * 3600000);
+  let h = d.getHours(), m = d.getMinutes() < 30 ? 30 : 0; if(m === 0) h++;
+  return pad(h % 24) + ":" + pad(m);   // 大夜班可以跨過午夜
+}
+const itemLabel = l => l.name + (l.opts ? "（" + l.opts + "）" : "");
+const linesText = items => items.map(l => itemLabel(l) + " " + money(l.price)).join("、");
+const norm = s => String(s || "").trim().replace(/\s+/g, " ");
+const dayMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ""); return m ? ((+m[1] * 60 + +m[2]) - DAY_START_HOUR * 60 + 1440) % 1440 : -1; };
+const isClosed = st => !!st.deadline && dayMin(hm(new Date())) > dayMin(st.deadline);
+const groupClosed = g => g.stores.length > 0 && g.stores.every(isClosed);
+function shiftNow(){ const h = new Date().getHours(); return h >= 7 && h < 15 ? "白班" : (h >= 15 && h < 23 ? "小夜班" : "大夜班"); }
+const storeOf = (g, type) => g.stores.find(s => s.type === type);
+const storesLine = g => g.stores.map(st => `${st.type === "drink" ? "🧋" : "🍱"} ${st.name}${st.deadline ? `（${st.deadline} 截止）` : ""}`).join("　");
+
+const ERR = {
+  network:"連線失敗，請檢查網路後再試", timeout:"連線逾時，請再試一次（第一次連線比較慢）",
+  need_pass:"需要通關密碼", wrong_admin_pass:"負責人密碼錯誤", admin_pass_not_set:"後端還沒設定 ADMIN_PASS",
+  no_session:"這團已經不存在了", need_name:"請輸入名字", no_items:"請至少填一樣餐點",
+  bad_last5:"請輸入 5 位數的帳號後五碼", need_with:"請輸入與誰確認繳款", bad_method:"請選擇付款方式",
+  no_transfer:"這團沒有開放匯款，請改用現金", missing_fields:"請填寫負責人名字", need_store:"請填寫便當店名",
+  not_found:"找不到這筆資料", title_exists:"今天已經有同名的團了，請換一個團名（例如在後面加上單位名稱）",
+  no_unpaid_order:"找不到你還沒付款的訂單（可能負責人已經幫你登記了）", need_confirm_title:"這團已經有人點餐，請輸入正確的團名才能刪除"
+};
+function errMsg(e){
+  e = String(e || "");
+  const [code, arg] = [e.split(":")[0], e.slice(e.indexOf(":") + 1)];
+  if(code === "closed") return `「${arg}」已經截止點餐`;
+  if(code === "bad_price") return `「${arg}」的金額不正確`;
+  if(code === "need_sugar_ice") return `「${arg}」請選擇甜度和冰塊`;
+  return ERR[e] || ("發生錯誤：" + e);
+}
+
+// ---------- API ----------
+async function api(action, data = {}){
+  const body = { action, pass: LS.get("bento_pass", ""), adminPass: LS.get("bento_admin", ""), ...data };
+  if(DEMO){ try{ return await Mock.handle(body); }catch(e){ return { ok:false, error:String(e.message || e) }; } }
+  const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 45000);
+  try{
+    const r = await fetch(API_URL, { method:"POST", body: JSON.stringify(body), signal: ctrl.signal }); // text/plain，避免 CORS 預檢
+    return await r.json();
+  }catch(e){ return { ok:false, error: e.name === "AbortError" ? "timeout" : "network" }; }
+  finally{ clearTimeout(timer); }
+}
+// Apps Script 閒置後第一次連線要先「開機」，提早送一個小請求叫醒它
+function warmUp(){ if(!DEMO && !warmUp.done){ warmUp.done = true; api("ping"); } }
+
+// ---------- 示範模式的假後端（邏輯與 Code.gs 相同，資料存在瀏覽器） ----------
+const Mock = {
+  db:null, images:{},
+  load(){
+    if(!this.db){ this.db = LS.get("bento_demo3", null) || { offset:0, groups:[], orders:[], stores:[] }; this.images = LS.get("bento_demo3_img", {}); }
+    return this.db;
+  },
+  save(){ LS.set("bento_demo3", this.db); LS.set("bento_demo3_img", this.images); /* 照片太大存不下時只留在記憶體 */ },
+  today(){ const d = new Date(Date.now() - DAY_START_HOUR * 3600000 + this.load().offset * 86400000); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; },
+  async handle(r){ await new Promise(res => setTimeout(res, 150)); const res = this.route(r, this.load(), this.today()); this.save(); return JSON.parse(JSON.stringify(res)); },
+  route(r, db, d){
+    const groups = () => db.groups.filter(g => g.date === d);
+    const orders = () => db.orders.filter(o => o.date === d);
+    const admin = !!r.adminPass;
+    switch(r.action){
+      case "ping": return { ok:true };
+      case "getToday": return { ok:true, date:d, now:hm(new Date()), groups:groups().map(g => {
+        const mine = orders().filter(o => o.gid === g.gid), unpaid = {};
+        mine.filter(o => o.pay.method === "later").forEach(o => unpaid[o.name] = o.amount);
+        return { ...g, names:mine.map(o => o.name), unpaid };
+      }) };
+      case "reportPay": {
+        const w = String(r.with||"").trim(); if(!w) return { ok:false, error:"need_with" };
+        const o = orders().find(x => x.gid === r.gid && x.name === String(r.name||"").trim() && x.pay.method === "later");
+        if(!o) return { ok:false, error:"no_unpaid_order" };
+        o.pay = { ...o.pay, method:"cash", with:w, note:`已與${w}確認繳款${o.amount}元` }; return { ok:true, note:o.pay.note };
+      }
+      case "getImages": return { ok:true, photos:this.images[r.key] || [] };
+      case "getOrders": {
+        if(!admin) return { ok:false, error:"wrong_admin_pass" };
+        const res = { ok:true, date:d, now:hm(new Date()), groups:groups().map(g => ({ ...g, orders:orders().filter(o => o.gid === g.gid) })) };
+        if(r.withStores) res.stores = db.stores.map(s => ({ ...s, photos:(this.images[s.key] || []).length }));
+        return res;
+      }
+      case "createSession": {
+        if(!admin) return { ok:false, error:"wrong_admin_pass" };
+        const duty = String(r.duty||"").trim(); if(!duty) return { ok:false, error:"missing_fields" };
+        const title = String(r.title||"").trim() || duty + "團";
+        if(groups().some(g => g.title === title)) return { ok:false, error:"title_exists" };
+        const stores = [];
+        (r.stores || []).forEach(st => {
+          const type = st.type === "drink" ? "drink" : "bento"; const name = String(st.name||"").trim();
+          if(!name || stores.some(x => x.type === type)) return;
+          const key = type + ":" + name;
+          if(Array.isArray(st.photos)) this.images[key] = st.photos.slice(0, 4);
+          stores.push({ id:type, type, name, phone:String(st.phone||"").trim(), deadline:st.deadline || "", key, photos:(this.images[key] || []).length });
+        });
+        if(!stores.some(s => s.type === "bento")) return { ok:false, error:"need_store" };
+        const gid = Math.random().toString(36).slice(2, 8);
+        db.groups.push({ gid, title, date:d, duty, bank:String(r.bank||"").trim(), stores });
+        stores.forEach(st => { db.stores = db.stores.filter(x => x.key !== st.key); db.stores.push({ name:st.name, type:st.type, phone:st.phone, key:st.key }); });
+        return { ok:true, gid };
+      }
+      case "deleteSession": {
+        const g = groups().find(x => x.gid === r.gid); if(!g) return { ok:true };
+        if(orders().some(o => o.gid === g.gid) && String(r.confirmTitle || "").trim() !== g.title) return { ok:false, error:"need_confirm_title" };
+        db.groups = db.groups.filter(x => x !== g); return { ok:true };
+      }
+      case "submitOrder": {
+        const g = groups().find(x => x.gid === r.gid); if(!g) return { ok:false, error:"no_session" };
+        const name = String(r.name||"").trim(); if(!name) return { ok:false, error:"need_name" };
+        const now = hm(new Date()), items = []; let amount = 0;
+        for(const it of r.items || []){
+          const type = it.type === "drink" ? "drink" : "bento", st = storeOf(g, type); if(!st) continue;
+          const n = String(it.name||"").trim(), price = Math.round(Number(it.price)); if(!n) continue;
+          if(!(price >= 0 && price <= 5000)) return { ok:false, error:"bad_price:" + n };
+          if(isClosed(st)) return { ok:false, error:"closed:" + st.name };
+          let opts = "";
+          if(type === "drink"){ if(!SUGAR.includes(it.sugar) || !ICE.includes(it.ice)) return { ok:false, error:"need_sugar_ice:" + n }; opts = it.sugar + "・" + it.ice; }
+          amount += price; items.push({ storeId:st.id, type, name:n, price, qty:1, opts });
+        }
+        if(!items.length) return { ok:false, error:"no_items" };
+        const p = r.pay || {}; let pay;
+        if(p.method === "transfer"){ if(!g.bank) return { ok:false, error:"no_transfer" }; if(!/^\d{5}$/.test(p.last5||"")) return { ok:false, error:"bad_last5" }; pay = { method:"transfer", last5:p.last5, with:"", note:"匯款，帳號後五碼 " + p.last5, confirmed:false }; }
+        else if(p.method === "cash"){ const w = String(p.with||"").trim(); if(!w) return { ok:false, error:"need_with" }; pay = { method:"cash", last5:"", with:w, note:`已與${w}確認繳款${amount}元`, confirmed:false }; }
+        else if(p.method === "later") pay = { method:"later", last5:"", with:"", note:"現金，晚點再付（還沒付款）", confirmed:false };
+        else return { ok:false, error:"bad_method" };
+        const same = o => o.date === d && o.gid === g.gid && o.name === name;
+        if(db.orders.some(same) && !r.replace) return { ok:false, error:"duplicate" };
+        db.orders = db.orders.filter(o => !same(o));
+        const order = { date:d, gid:g.gid, id:Math.random().toString(36).slice(2,10), name, items, amount, note:String(r.note||""), pay };
+        db.orders.push(order); return { ok:true, order };
+      }
+      case "setConfirmed": { const o = db.orders.find(x => x.id === r.id); if(!o) return { ok:false, error:"not_found" };
+        if(r.confirmed && o.pay.method === "later"){ const by = r.by || "負責人"; o.pay = { ...o.pay, method:"cash", with:by, note:`已與${by}確認繳款${o.amount}元` }; }
+        o.pay.confirmed = !!r.confirmed; return { ok:true }; }
+      case "deleteOrder": db.orders = db.orders.filter(x => x.id !== r.id); return { ok:true };
+      case "updateDeadline": { const g = groups().find(x => x.gid === r.gid); const st = g && g.stores.find(x => x.id === r.storeId); if(st) st.deadline = r.deadline || ""; return { ok:true }; }
+    }
+    return { ok:false, error:"unknown_action" };
+  }
+};
+
+// ---------- 菜單照片 ----------
+const IMG = {};   // key -> 陣列 | "loading" | "error"
+function photosHTML(st){
+  if(!st.photos) return `<p class="muted" style="margin:0 0 10px">負責人沒有上傳菜單照片，請直接填寫要吃什麼。</p>`;
+  const v = IMG[st.key];
+  let inner;
+  if(Array.isArray(v)) inner = v.map((src, i) => `<img src="${src}" alt="菜單 ${i + 1}" data-act="view" data-key="${esc(st.key)}" data-i="${i}">`).join("") + `<div class="photo-hint">點照片可以放大</div>`;
+  else if(v === "error") inner = `<p class="muted">菜單照片載入失敗，<a href="#" data-act="retryImg" data-key="${esc(st.key)}">重試</a></p>`;
+  else inner = `<p class="muted"><span class="spin"></span>菜單照片載入中…</p>`;
+  return `<div class="photos" data-photos="${esc(st.key)}">${inner}</div>`;
+}
+async function loadImages(st, force){
+  if(!st.photos || (!force && IMG[st.key] && IMG[st.key] !== "error")) return;
+  IMG[st.key] = "loading";
+  const r = await api("getImages", { key:st.key });
+  IMG[st.key] = r.ok ? r.photos : "error";
+  const box = document.querySelector(`[data-photos="${CSS.escape(st.key)}"]`);
+  if(box){ const tmp = document.createElement("div"); tmp.innerHTML = photosHTML(st); box.replaceWith(tmp.firstElementChild); }
+}
+$("#viewer").addEventListener("click", () => { $("#viewer").classList.remove("show"); document.body.style.overflow = ""; });
+
+// =========================================================
+// 點餐頁
+// =========================================================
+const O = { data:null, form:null, dup:false, done:null, editing:false, busy:false, missing:-1 };
+const hashGid = () => location.hash.startsWith("#g-") ? location.hash.slice(3) : null;
+function curGroup(){
+  const gs = (O.data && O.data.groups) || [], hg = hashGid();
+  if(hg) return gs.find(g => g.gid === hg) || null;
+  return gs.length === 1 ? gs[0] : null;
+}
+function newForm(keepName){
+  return { name: keepName ? LS.get("bento_name", "") : "", bento:[{ name:"", price:"" }], drinks:[], note:"",
+    method: LS.get("bento_method", "transfer"), last5: LS.get("bento_last5", ""), with:"" };
+}
+async function loadOrder(){
+  const r = await api("getToday");
+  O.data = r; if(!O.form) O.form = newForm(true);
+  render();
+}
+function payMethod(g){ return !g.bank && O.form.method === "transfer" ? "cash" : O.form.method; }
+// 整理表單裡的品項；有錯就回傳錯誤訊息
+function collectItems(){
+  const f = O.form, items = []; let err = "", missing = -1;
+  f.bento.forEach(b => {
+    const n = norm(b.name), p = String(b.price).trim();
+    if(!n && !p) return;
+    if(!n) err = err || "有一項只填了金額，請填寫吃什麼";
+    else if(p === "" || isNaN(+p) || +p < 0) err = err || `請填寫「${n}」的金額`;
+    else items.push({ type:"bento", name:n, price:Math.round(+p), opts:"" });
+  });
+  f.drinks.forEach((dk, j) => {
+    const n = norm(dk.name), p = String(dk.price).trim();
+    if(!n && !p && !dk.sugar && !dk.ice) return;
+    if(!n) err = err || "有一杯飲料沒填名稱";
+    else if(p === "" || isNaN(+p) || +p < 0) err = err || `請填寫「${n}」的金額`;
+    else if(!dk.sugar || !dk.ice){ err = err || `「${n}」請選擇甜度和冰塊`; if(missing < 0) missing = j; }
+    else items.push({ type:"drink", name:n, price:Math.round(+p), sugar:dk.sugar, ice:dk.ice, opts:dk.sugar + "・" + dk.ice });
+  });
+  return { items, err, missing };
+}
+const totalOf = () => collectItems().items.reduce((a, l) => a + l.price, 0);
+function updateTotal(){
+  const t = totalOf();
+  const tot = $("#tot"); if(tot) tot.textContent = money(t);
+  const amt = $("#amt"); if(amt) amt.value = money(t);
+  const prev = $("#prev"); if(prev) prev.textContent = `已與${O.form.with.trim() || "＿＿"}確認繳款${t}元`;
+}
+
+function renderOrder(){
+  const r = O.data;
+  if(!r){ setHeader("🍱 訂便當"); return setMain(`<div class="empty"><span class="spin"></span>載入中…</div>`); }
+  if(!r.ok){
+    setHeader("🍱 訂便當");
+    if(r.error === "need_pass") return setMain(`<div class="card"><h2>請輸入科內通關密碼</h2>
+      <input type="password" id="passIn" placeholder="通關密碼"><button class="btn full" style="margin-top:10px" data-act="savePass">進入</button>
+      <p class="muted">密碼請詢問同事，輸入一次之後這台手機會記住。</p></div>`);
+    return setMain(`<div class="card empty"><div class="big-emoji">⚠️</div><p>${esc(errMsg(r.error))}</p><button class="btn" data-act="reload">重試</button></div>`);
+  }
+  const gs = r.groups || [];
+  if(!gs.length){
+    setHeader(`🍱 ${fmtDate(r.date)} 訂便當`);
+    return setMain(`<div class="card empty"><div class="big-emoji">🕘</div><p>今天的訂餐還沒開放<br>請等今日負責人在 LINE 群組發布</p>
+      <button class="btn ghost sm" data-act="reload">重新整理</button></div><p class="foot"><a href="#admin">我是今日負責人 →</a></p>`);
+  }
+  const g = curGroup();
+  if(!g){
+    setHeader(`🍱 ${fmtDate(r.date)} 訂便當`, `今天有 ${gs.length} 團，請選擇要參加哪一團`);
+    const me = LS.get("bento_name", "");
+    let h = hashGid() ? `<div class="banner">這個連結的團已經不存在（可能被負責人刪除了），請從下面重新選擇。</div>` : "";
+    [...gs].sort((a, b) => groupClosed(a) - groupClosed(b)).forEach(x => {
+      const closed = groupClosed(x);
+      h += `<div class="card" ${closed ? 'style="opacity:.6"' : ""}><div class="row between"><h2 style="margin:0">${esc(x.title)}</h2>
+        <span class="row">${closed ? `<span class="tag t-bad">已截止</span>` : ""}${me && x.names.includes(me) ? `<span class="tag t-ok">你已點餐</span>` : ""}</span></div>
+        <div class="muted" style="margin:6px 0">負責人：${esc(x.duty)}　·　已有 ${x.names.length} 人點餐</div><div>${esc(storesLine(x))}</div>
+        <button class="btn ${closed ? "ghost" : ""} full" style="margin-top:10px" data-act="chooseGroup" data-g="${x.gid}">${closed ? "查看" : "參加這團"}</button></div>`;
+    });
+    return setMain(h + `<p class="foot"><a href="#admin">負責人後台</a></p>`);
+  }
+  setHeader(`🍱 ${fmtDate(r.date)} ${g.title} 訂便當`, `負責人：${g.duty}\n${storesLine(g)}`);
+  if(O.done) return renderDone(g);
+  if(groupClosed(g) && !O.editing) return renderClosed(g, gs);
+
+  const f = O.form, bs = storeOf(g, "bento"), ds = storeOf(g, "drink");
+  const total = totalOf(), method = payMethod(g);
+  let h = unpaidBanner(g) + `<div class="card"><h2><span class="step">1</span>你的名字 <span class="req">*</span></h2>
+    <input type="text" id="fName" data-in="name" placeholder="請輸入名字" value="${esc(f.name)}" maxlength="30">
+    <div class="hint" id="nameHint">${nameHintText(g)}</div></div>`;
+
+  // 便當
+  const bClosed = isClosed(bs);
+  h += `<div class="card"><div class="row between"><h2 style="margin:0"><span class="step">2</span>🍱 ${esc(bs.name)}</h2>
+    ${bClosed ? `<span class="tag t-bad">已截止</span>` : bs.deadline ? `<span class="muted">${esc(bs.deadline)} 截止</span>` : ""}</div>
+    <div style="margin-top:10px">${photosHTML(bs)}</div>
+    <div class="row muted" style="gap:6px;margin-bottom:4px"><span style="flex:1">要吃什麼</span><span style="width:96px">金額</span><span style="width:36px"></span></div>`;
+  f.bento.forEach((b, j) => {
+    h += `<div class="item-row"><input type="text" data-in="bn" data-j="${j}" value="${esc(b.name)}" placeholder="例：排骨飯" maxlength="40" ${bClosed ? "disabled" : ""}>
+      <input type="number" data-in="bp" data-j="${j}" value="${esc(b.price)}" placeholder="$" inputmode="numeric" min="0" ${bClosed ? "disabled" : ""}>
+      <button class="x" data-act="rmB" data-j="${j}" ${bClosed ? "disabled" : ""}>×</button></div>`;
+  });
+  h += `<button class="btn ghost sm" data-act="addB" ${bClosed ? "disabled" : ""}>＋ 再加一項（例如加蛋、加飯）</button></div>`;
+
+  // 飲料
+  if(ds){
+    const dClosed = isClosed(ds);
+    h += `<div class="card"><div class="row between"><h2 style="margin:0">🧋 飲料：${esc(ds.name)}</h2>
+      ${dClosed ? `<span class="tag t-bad">已截止</span>` : ds.deadline ? `<span class="muted">${esc(ds.deadline)} 截止</span>` : ""}</div>
+      <p class="muted" style="margin:4px 0 10px">飲料是選填的，不想喝可以跳過</p>${photosHTML(ds)}`;
+    f.drinks.forEach((dk, j) => {
+      const miss = O.missing === j;
+      h += `<div class="drink"><div class="row between" style="margin-bottom:6px"><b>第 ${j + 1} 杯</b><button class="x" data-act="rmD" data-j="${j}">×</button></div>
+        <div class="item-row" style="grid-template-columns:1fr 96px"><input type="text" data-in="dn" data-j="${j}" value="${esc(dk.name)}" placeholder="喝什麼，例：珍奶（大）" maxlength="40">
+        <input type="number" data-in="dp" data-j="${j}" value="${esc(dk.price)}" placeholder="$" inputmode="numeric" min="0"></div>
+        <div class="muted">甜度 <span class="req">*</span></div><div class="chips ${miss && !dk.sugar ? "missing" : ""}">${SUGAR.map(x => `<button class="chip ${dk.sugar === x ? "on" : ""}" data-act="dsugar" data-j="${j}" data-v="${x}">${x}</button>`).join("")}</div>
+        <div class="muted">冰塊 <span class="req">*</span></div><div class="chips ${miss && !dk.ice ? "missing" : ""}">${ICE.map(x => `<button class="chip ${dk.ice === x ? "on" : ""}" data-act="dice" data-j="${j}" data-v="${x}">${x}</button>`).join("")}</div></div>`;
+    });
+    h += `<button class="btn ghost sm" data-act="addD" ${dClosed ? "disabled" : ""}>＋ ${f.drinks.length ? "再加一杯" : "我要點飲料"}</button></div>`;
+  }
+
+  h += `<div class="card"><label class="f" style="margin-top:0">備註（選填）</label><input type="text" data-in="note" placeholder="例如：飯少、不要辣" value="${esc(f.note)}" maxlength="100"></div>`;
+
+  // 付款
+  const segBtn = (v, label) => `<button data-act="method" data-v="${v}" class="${method === v ? "on" : ""}">${label}</button>`;
+  h += `<div class="card"><h2><span class="step">3</span>付款方式</h2>
+    <div class="seg">${g.bank ? segBtn("transfer", "🏦 匯款") : ""}${segBtn("cash", "💵 已付現金")}${segBtn("later", "⏳ 晚點付")}</div>
+    ${g.bank ? "" : `<p class="muted" style="margin:6px 0 0">這團不開放匯款，只收現金。</p>`}`;
+  if(method === "later"){
+    h += `<label class="f">金額（自動帶入）</label><input type="text" id="amt" value="${money(total)}" disabled>
+      <div class="note-preview" style="background:var(--warn-soft);color:var(--warn)">先送出訂單，錢晚點再付。<br>付完錢後，再點一次點餐連結，按最上面的「<b>我付了</b>」登記就好。</div>`;
+  }else if(method === "transfer"){
+    h += `<div class="copybox" style="margin-top:10px">匯款給 ${esc(g.duty)}：\n${esc(g.bank)}</div>
+      <label class="f">金額（自動帶入）</label><input type="text" id="amt" value="${money(total)}" disabled>
+      <label class="f">你的帳號後五碼 <span class="req">*</span></label><input type="text" id="fLast5" data-in="last5" inputmode="numeric" maxlength="5" value="${esc(f.last5)}" placeholder="例如 12345">`;
+  }else{
+    h += `<label class="f">與誰確認繳款 <span class="req">*</span></label><input type="text" id="fWith" data-in="with" value="${esc(f.with)}" placeholder="輸入名字，例如：小王" maxlength="30">
+      <label class="f">金額（自動帶入）</label><input type="text" id="amt" value="${money(total)}" disabled>
+      <div class="note-preview" id="prev">已與${esc(f.with.trim() || "＿＿")}確認繳款${total}元</div>
+      <p class="muted" style="margin:8px 0 0">現金請放進繳款盒，或直接交給確認的人。</p>`;
+  }
+  if(O.dup){
+    h += `<div class="banner" style="margin:12px 0 0">這團已經有「${esc(f.name.trim())}」的訂單了。<br>確定要用這次的內容<b>取代</b>原本的訂單嗎？
+      <div class="row" style="margin-top:8px"><button class="btn sm" data-act="submitReplace">確定取代</button><button class="btn ghost sm" data-act="cancelDup">取消</button></div></div>`;
+  }
+  h += `<div class="sticky"><div class="row between"><div><span class="muted">合計</span>　<span class="total" id="tot">${money(total)}</span></div>
+    <button class="btn big" data-act="submit" ${O.busy || O.dup ? "disabled" : ""}>${O.busy ? '<span class="spin"></span>送出中' : O.editing ? "更新訂單" : "送出訂單"}</button></div></div></div>`;
+
+  if(g.names.length) h += `<div class="card"><h3 style="margin-top:0">這團已點餐（${g.names.length} 人）</h3><div class="muted">${g.names.map(esc).join("、")}</div></div>`;
+  h += `<p class="foot">${gs.length > 1 ? `<a href="#" data-act="switchGroup">切換到其他團（今天共 ${gs.length} 團）</a>　·　` : ""}<a href="#admin">負責人後台</a></p>`;
+  setMain(h);
+  g.stores.forEach(st => loadImages(st));
+}
+function renderClosed(g, gs){
+  const me = LS.get("bento_name", ""), open = gs.filter(x => x !== g && !groupClosed(x));
+  setMain(unpaidBanner(g) + `<div class="card empty" style="color:var(--ink)"><div class="big-emoji">⏰</div><h2>「${esc(g.title)}」已截止</h2>
+    <p class="muted">${g.stores.map(st => `${st.type === "drink" ? "🧋" : "🍱"} ${esc(st.name)}：${esc(st.deadline)} 截止`).join("<br>")}</p>
+    ${me && g.names.includes(me) ? `<p><span class="tag t-ok">${esc(me)}，你已經點過了</span></p>` : ""}
+    <p>還想點的話，請直接聯絡負責人 <b>${esc(g.duty)}</b>。</p>
+    ${open.length ? `<div style="margin-top:16px;text-align:left"><h3>現在還可以點的團</h3>${open.map(x => `<button class="btn full" style="margin-top:8px" data-act="chooseGroup" data-g="${x.gid}">${esc(x.title)}（${esc(storesLine(x))}）</button>`).join("")}</div>` : ""}
+    </div><p class="foot"><a href="#admin">負責人後台</a></p>`);
+}
+// 「晚點付」還沒付錢的人，打開點餐頁時最上面會出現提醒和「我付了」
+function unpaidBanner(g){
+  const me = LS.get("bento_name", ""), amt = me && g.unpaid ? g.unpaid[me] : undefined;
+  if(amt === undefined) return "";
+  if(!O.paying) return `<div class="card" style="border:2px solid var(--bad);background:var(--bad-soft)"><div class="row between wrap">
+    <div><b style="color:var(--bad)">⚠️ ${esc(me)}，你在「${esc(g.title)}」還沒付款</b><div>金額 <b>${money(amt)}</b>，付給負責人 ${esc(g.duty)}</div></div>
+    <button class="btn" data-act="payStart">我付了</button></div></div>`;
+  return `<div class="card" style="border:2px solid var(--bad)"><h2>💵 登記付款（${money(amt)}）</h2>
+    <label class="f" style="margin-top:0">錢交給誰了？</label><input type="text" id="payWith" placeholder="例如：${esc(g.duty)}" maxlength="30">
+    <div class="row" style="margin-top:10px"><button class="btn" data-act="payReport">確認</button><button class="btn ghost" data-act="payCancel">取消</button></div></div>`;
+}
+function nameHintText(g){
+  const n = (O.form.name || "").trim();
+  if(!O.editing && n && g.names.includes(n)) return `這團已經有「${esc(n)}」的訂單，送出會取代原本的訂單。`;
+  return "";
+}
+function renderDone(g){
+  const o = O.done;
+  const st = o.pay.method === "transfer" ? { cls:"t-warn", label:`匯款（後五碼 ${o.pay.last5}）` } : o.pay.method === "later" ? { cls:"t-bad", label:"⏳ 還沒付款" } : { cls:"t-info", label:o.pay.note };
+  setMain(`<div class="card empty" style="color:var(--ink)"><div class="big-emoji">✅</div><h2>${esc(o.name)}，訂餐完成！</h2>
+    <p>${o.items.map(l => esc(itemLabel(l)) + " " + money(l.price)).join("<br>")}${o.note ? `<br><span class="muted">備註：${esc(o.note)}</span>` : ""}</p>
+    <p class="total">${money(o.amount)}</p><p><span class="tag ${st.cls}">${esc(st.label)}</span></p>
+    ${o.pay.method === "transfer" ? `<div class="copybox" style="text-align:left">請匯款到：\n${esc(g.bank)}\n金額：${money(o.amount)}</div>`
+      : o.pay.method === "later" ? `<div class="note-preview" style="background:var(--warn-soft);color:var(--warn);text-align:left">記得把 ${money(o.amount)} 交給負責人 ${esc(g.duty)}（或放繳款盒）。<br>付完後再點一次點餐連結，按「<b>我付了</b>」登記。</div>`
+      : `<p class="muted">記得把現金放進繳款盒（或交給 ${esc(o.pay.with)}）</p>`}
+    <div class="row wrap" style="justify-content:center;margin-top:14px"><button class="btn ghost" data-act="editMine">修改我的訂單</button><button class="btn ghost" data-act="another">幫別人點</button></div></div>`);
+}
+async function submitOrder(replace){
+  const g = curGroup(), f = O.form, name = f.name.trim();
+  if(!name){ toast("請先輸入名字"); const el = $("#fName"); el.classList.add("err"); el.focus(); el.scrollIntoView({ block:"center" }); return; }
+  const { items, err, missing } = collectItems();
+  if(err){ O.missing = missing; keepScroll(render); return toast(err); }
+  O.missing = -1;
+  if(!items.length) return toast("請至少填一樣餐點");
+  const method = payMethod(g);
+  if(method === "transfer" && !/^\d{5}$/.test(f.last5)){ toast("請輸入 5 位數的帳號後五碼"); $("#fLast5").focus(); return; }
+  if(method === "cash" && !f.with.trim()){ toast("請輸入與誰確認繳款"); $("#fWith").focus(); return; }
+  if(!replace && !O.editing && g.names.includes(name)){ O.dup = true; keepScroll(render); return; }
+  O.busy = true; O.dup = false; keepScroll(render);
+  const r = await api("submitOrder", { gid:g.gid, name, items, note:f.note.trim(), pay:{ method, last5:f.last5, with:f.with.trim() }, replace: !!replace || O.editing });
+  O.busy = false;
+  if(r.ok){
+    LS.set("bento_name", name); if(g.bank || method !== "transfer") LS.set("bento_method", method); if(f.last5) LS.set("bento_last5", f.last5);
+    O.done = r.order; O.editing = false;
+    if(!g.names.includes(name)) g.names.push(name);
+    g.unpaid = g.unpaid || {}; if(method === "later") g.unpaid[name] = r.order.amount; else delete g.unpaid[name];
+    render(); window.scrollTo(0, 0);
+  }else if(r.error === "duplicate"){ O.dup = true; keepScroll(render); }
+  else { toast(errMsg(r.error)); keepScroll(render); }
+}
+
+// =========================================================
+// 負責人後台
+// =========================================================
+const A = { authed:false, data:null, loginErr:"", loggingIn:false, draft:null, confirmDel:null, editDl:null, busy:false, loadedAt:null, gid:null, creating:false };
+const adminGroup = () => A.data && A.data.groups && A.data.groups.find(g => g.gid === A.gid) || null;
+function newStore(type){ return { type, name:"", phone:"", deadline:defaultDeadline(type), photos:[], changed:false, loading:false, msg:"" }; }
+const draftTitle = d => [d.shift, norm(d.extra)].filter(Boolean).join(" ");
+function newDraft(){ const bank = LS.get("bento_bank", ""); return { shift:shiftNow(), extra:LS.get("bento_extra", ""), duty:LS.get("bento_duty", ""), transfer:LS.get("bento_transfer", !!bank), bank, stores:[newStore("bento")] }; }
+
+async function loadAdmin(silent){
+  if(!LS.get("bento_admin", "")){ A.authed = false; return render(); }
+  const r = await api("getOrders", { withStores:true });
+  A.loggingIn = false;
+  if(!r.ok && (r.error === "wrong_admin_pass" || r.error === "admin_pass_not_set")){ A.authed = false; A.loginErr = errMsg(r.error); LS.del("bento_admin"); return render(); }
+  A.authed = true; A.data = r; A.loadedAt = new Date();
+  if(r.ok){
+    const mine = LS.get("bento_mygroup", null);   // 這台裝置今天開的團，登入後直接打開
+    if(!A.gid && mine && mine.date === r.date && r.groups.some(g => g.gid === mine.gid)) A.gid = mine.gid;
+    if(A.gid && !r.groups.some(g => g.gid === A.gid)) A.gid = null;
+  }
+  silent ? keepScroll(render) : render();
+}
+
+function renderAdmin(){
+  setHeader("🧾 負責人後台", A.data && A.data.date ? fmtDate(A.data.date) : "");
+  if(!A.authed){
+    return setMain(`<div class="card"><h2>負責人登入</h2><input type="password" id="adminIn" placeholder="負責人密碼" ${A.loggingIn ? "disabled" : ""}>
+      ${A.loginErr ? `<p class="hint" style="color:var(--bad)">${esc(A.loginErr)}</p>` : ""}
+      <button class="btn full" style="margin-top:10px" data-act="adminLogin" ${A.loggingIn ? "disabled" : ""}>${A.loggingIn ? '<span class="spin"></span>登入中…' : "登入"}</button>
+      ${A.loggingIn ? `<p class="muted">第一次連線需要叫醒伺服器，大約 5～10 秒，請稍候。</p>` : ""}
+      <p class="muted">${DEMO ? "示範模式：隨便輸入任何密碼都可以。" : "密碼由科內統一設定，所有負責人共用。輸入一次後這台裝置會記住。"}</p></div>
+      <p class="foot"><a href="#">← 回點餐頁</a></p>`);
+  }
+  if(!A.data) return setMain(`<div class="empty"><span class="spin"></span>載入中…<p class="muted">第一次連線大約 5～10 秒</p></div>`);
+  if(!A.data.ok) return setMain(`<div class="card empty"><p>${esc(errMsg(A.data.error))}</p><button class="btn" data-act="reload">重試</button></div>`);
+  const gs = A.data.groups;
+  if(A.creating || !gs.length) return renderCreate();
+  const g = adminGroup();
+  if(g) return renderResults(g);
+  renderGroupList();
+}
+
+function storeCardHTML(st, i){
+  const saved = (A.data.stores || []).filter(x => x.type === st.type);
+  let h = `<div class="card"><div class="row between"><h2 style="margin:0">${st.type === "drink" ? "🧋 飲料" : "🍱 便當"}</h2>
+    ${st.type === "drink" ? `<button class="btn ghost sm" data-act="rmStore" data-idx="${i}">不加開了</button>` : ""}</div>`;
+  if(saved.length) h += `<label class="f">從存過的店家選（菜單照片會一起帶入）</label><select data-ch="pickSaved" data-idx="${i}"><option value="">— 新店家 —</option>
+    ${saved.map((x, j) => `<option value="${j}" ${x.name === st.name ? "selected" : ""}>${esc(x.name)}${x.photos ? `（${x.photos} 張照片）` : ""}</option>`).join("")}</select>`;
+  h += `<label class="f">店名 <span class="req">*</span></label><input type="text" data-in="st" data-idx="${i}" data-k="name" value="${esc(st.name)}" maxlength="30">
+    <div class="row"><div style="flex:1"><label class="f">店家電話</label><input type="text" data-in="st" data-idx="${i}" data-k="phone" value="${esc(st.phone)}" maxlength="30"></div>
+    <div style="width:130px"><label class="f">截止時間</label><input type="time" data-in="st" data-idx="${i}" data-k="deadline" value="${esc(st.deadline)}"></div></div>
+    <label class="f">菜單照片（最多 4 張，大家點餐時會看到）</label>`;
+  if(st.loading) h += `<p class="muted"><span class="spin"></span>載入上次的菜單照片…</p>`;
+  else{
+    h += `<div class="thumbs">${st.photos.map((src, j) => `<div class="thumb"><img src="${src}" alt="" data-act="viewDraft" data-idx="${i}" data-i="${j}"><button data-act="rmPhoto" data-idx="${i}" data-j="${j}">×</button></div>`).join("")}
+      ${st.photos.length < 4 ? `<label class="addphoto"><b>＋</b>拍照／選照片<input type="file" accept="image/*" multiple data-ch="photo" data-idx="${i}" hidden></label>` : ""}</div>`;
+  }
+  if(st.msg) h += `<p class="muted" style="margin:6px 0 0">${esc(st.msg)}</p>`;
+  return h + `</div>`;
+}
+
+function renderCreate(){
+  if(!A.draft) A.draft = newDraft();
+  const d = A.draft, others = A.data.groups;
+  let h = others.length ? `<div class="banner">開一個新的團（例如另一棟樓、另一家店）。今天已經有：${others.map(g => esc(g.title)).join("、")}。<br><a href="#" data-act="cancelCreate">← 取消，回到團列表</a></div>`
+    : `<div class="banner">今天（${fmtDate(A.data.date)}）還沒有點餐頁。填好下面的資料，按「產生點餐頁」，再把連結貼到 LINE 群組。</div>`;
+  h += `<div class="card"><h2>團名與負責人</h2>
+    <label class="f" style="margin-top:0">班別</label>
+    <div class="chips">${SHIFTS.map(x => `<button class="chip ${d.shift === x ? "on" : ""}" data-act="shift" data-v="${x}">${x}</button>`).join("")}<button class="chip ${!d.shift ? "on" : ""}" data-act="shift" data-v="">不分班</button></div>
+    <label class="f">補充（選填）</label><input type="text" data-in="extra" value="${esc(d.extra)}" placeholder="例如：急診、A棟、二樓" maxlength="14">
+    <p class="muted" style="margin:6px 0 0">團名：<b id="titlePrev">${esc(draftTitle(d) || "（負責人名字）團")}</b></p>
+    <label class="f">你的名字 <span class="req">*</span></label><input type="text" data-in="duty" value="${esc(d.duty)}" maxlength="30"></div>`;
+  d.stores.forEach((st, i) => h += storeCardHTML(st, i));
+  if(!d.stores.some(s => s.type === "drink")) h += `<button class="btn ghost full" data-act="addDrink" style="margin-bottom:12px">＋ 今天加開飲料</button>`;
+  h += `<div class="card"><h2>收款方式</h2><p class="muted" style="margin:0 0 8px">現金一定可以。要不要讓大家匯款給你，由你決定。</p>
+    <label class="chk"><input type="checkbox" data-ch="transfer" ${d.transfer ? "checked" : ""}>開放匯款到我的帳戶</label>
+    ${d.transfer ? `<label class="f">收款帳號 <span class="req">*</span></label><textarea data-in="bank" rows="3" placeholder="銀行名稱（代碼）&#10;帳號&#10;戶名">${esc(d.bank)}</textarea>` : `<p class="muted" style="margin:8px 0 0">不開放：這團只收現金。</p>`}</div>
+    <p class="muted" style="text-align:center">這台裝置會記住你的名字、團名和帳號，下次不用再打。</p>
+    <button class="btn full big" data-act="create" ${A.busy ? "disabled" : ""}>${A.busy ? '<span class="spin"></span>建立中（上傳照片需要幾秒）' : "產生點餐頁"}</button>
+    <p class="foot"><a href="#">← 回點餐頁</a>　·　<a href="#" data-act="logout">登出</a></p>`;
+  setMain(h);
+}
+
+function renderGroupList(){
+  const gs = A.data.groups;
+  let h = `<div class="card"><h2>今天的團（${gs.length}）</h2><p class="muted" style="margin:0">選擇你負責的團，查看統計和對帳。</p></div>`;
+  gs.forEach(g => {
+    const total = g.orders.reduce((a, o) => a + o.amount, 0), pend = g.orders.filter(o => !o.pay.confirmed).length;
+    h += `<div class="card"><div class="row between"><h2 style="margin:0">${esc(g.title)}</h2><span class="muted">負責人：${esc(g.duty)}</span></div>
+      <div style="margin:6px 0">${esc(storesLine(g))}</div>
+      <div class="muted">${g.orders.length} 人點餐・${money(total)}・${pend} 筆待確認・${g.bank ? "可匯款" : "只收現金"}</div>
+      <button class="btn full" style="margin-top:10px" data-act="openGroup" data-g="${g.gid}">查看這團</button></div>`;
+  });
+  h += `<button class="btn ghost full big" data-act="newGroup">＋ 開新團（另一棟樓／另一家店）</button>
+    <p class="foot"><a href="#">← 回點餐頁</a>　·　<a href="#" data-act="logout">登出</a></p>`;
+  setMain(h);
+}
+
+function renderResults(s){
+  const d = A.data, orders = s.orders || [];
+  const url = location.href.split("#")[0] + "#g-" + s.gid;
+  setHeader(`🧾 ${s.title}`, `${fmtDate(d.date)}・負責人：${s.duty}・${s.bank ? "可匯款" : "只收現金"}`);
+  const shareText = `🍱 ${fmtDate(d.date)} ${s.title} 訂便當\n${s.stores.map(st => `${st.type === "drink" ? "🧋" : "🍱"} ${st.name}${st.deadline ? `（${st.deadline} 截止）` : ""}`).join("\n")}\n\n點餐連結👇\n${url}\n\n負責人：${s.duty}${s.bank ? "" : "（只收現金）"}`;
+  const grand = orders.reduce((a, o) => a + o.amount, 0);
+  const pending = orders.filter(o => !o.pay.confirmed);
+
+  let h = d.groups.length > 1 ? `<p style="margin:0 0 10px"><a href="#" data-act="backList">← 今天所有團（${d.groups.length}）</a></p>` : "";
+  h += `<div class="card"><h2>📣 貼到 LINE 群組</h2><div class="copybox">${esc(shareText)}</div><button class="btn sm" data-act="copy" data-text="${esc(shareText)}">複製公告</button></div>`;
+  h += `<div class="stats"><div class="stat"><b>${orders.length}</b><small>人點餐</small></div><div class="stat"><b>${money(grand)}</b><small>總金額</small></div>
+    <div class="stat"><b style="color:var(--warn)">${pending.length}</b><small>筆待確認</small></div></div>`;
+
+  s.stores.forEach(st => {
+    const agg = {}; let subtotal = 0; const notes = [];
+    orders.forEach(o => {
+      const mine = o.items.filter(l => (l.type || "bento") === st.type);
+      mine.forEach(l => { const k = itemLabel(l); agg[k] = agg[k] || { qty:0, amt:0 }; agg[k].qty += l.qty || 1; agg[k].amt += l.price * (l.qty || 1); subtotal += l.price * (l.qty || 1); });
+      if(mine.length && o.note && st.type !== "drink") notes.push(`${o.name}：${o.note}`);
+    });
+    const keys = Object.keys(agg).sort((a, b) => agg[b].qty - agg[a].qty || a.localeCompare(b));
+    const cnt = keys.reduce((a, k) => a + agg[k].qty, 0);
+    const callText = `${st.name} 您好，我要訂${st.type === "drink" ? "飲料" : "便當"}：\n${keys.map(k => `${k} ×${agg[k].qty}`).join("\n")}${notes.length ? "\n\n備註：\n" + notes.map(n => "・" + n.replace(/^[^：]+：/, "")).join("\n") : ""}\n\n共 ${cnt} 份，${money(subtotal)}`;
+    h += `<div class="card"><div class="row between"><h2 style="margin:0">${st.type === "drink" ? "🧋" : "📞"} ${esc(st.name)}</h2>`;
+    if(A.editDl === st.id) h += `<span class="row"><input type="time" id="dlIn" value="${esc(st.deadline)}" style="width:120px"><button class="btn sm" data-act="saveDl" data-s="${st.id}">儲存</button><button class="btn ghost sm" data-act="cancelDl">取消</button></span>`;
+    else h += `<span class="row"><span class="muted">${st.deadline ? (isClosed(st) ? "已截止 " : "截止 ") + esc(st.deadline) : "不限時間"}</span><button class="btn ghost sm" data-act="editDl" data-s="${st.id}">修改</button></span>`;
+    h += `</div>`;
+    if(!keys.length) h += `<p class="muted">還沒有人點。</p>`;
+    else{
+      h += `<table style="margin-top:8px"><tr><th>品項</th><th class="num">數量</th><th class="num">小計</th></tr>
+        ${keys.map(k => `<tr><td>${esc(k)}</td><td class="num"><b>${agg[k].qty}</b></td><td class="num">${money(agg[k].amt)}</td></tr>`).join("")}
+        <tr><td><b>合計 ${cnt} 份</b></td><td></td><td class="num"><b>${money(subtotal)}</b></td></tr></table>
+        <p class="muted" style="margin:6px 0 0">品項是大家自己填的，寫法不同會分開列（例如「排骨飯」和「排骨便當」），打電話前請看一下。</p>
+        ${notes.length ? `<h3>備註</h3><div class="muted">${notes.map(esc).join("<br>")}</div>` : ""}
+        <div class="row wrap" style="margin-top:12px"><button class="btn sm" data-act="copy" data-text="${esc(callText)}">複製訂餐文字</button>${st.phone ? `<span class="muted">電話：<a href="tel:${esc(st.phone)}">${esc(st.phone)}</a></span>` : ""}</div>`;
+    }
+    h += `</div>`;
+  });
+
+  // 收款總覽
+  const tr = orders.filter(o => o.pay.method === "transfer"), cash = orders.filter(o => o.pay.method === "cash"), later = orders.filter(o => o.pay.method === "later");
+  const byWith = {}; cash.forEach(o => { (byWith[o.pay.with] = byWith[o.pay.with] || []).push(o); });
+  h += `<div class="card"><h2>💰 收款總覽</h2><table>
+    ${s.bank ? `<tr><td>🏦 匯款</td><td class="num">${tr.length} 人</td><td class="num">${money(tr.reduce((a, o) => a + o.amount, 0))}</td><td class="num muted">已對帳 ${tr.filter(o => o.pay.confirmed).length}/${tr.length}</td></tr>` : ""}
+    ${Object.keys(byWith).map(w => `<tr><td>💵 與${esc(w)}確認</td><td class="num">${byWith[w].length} 人</td><td class="num">${money(byWith[w].reduce((a, o) => a + o.amount, 0))}</td><td class="num muted">${byWith[w].map(o => esc(o.name)).join("、")}</td></tr>`).join("")}
+    ${later.length ? `<tr style="color:var(--bad)"><td>⏳ 還沒付款</td><td class="num">${later.length} 人</td><td class="num">${money(later.reduce((a, o) => a + o.amount, 0))}</td><td class="num">${later.map(o => esc(o.name)).join("、")}</td></tr>` : ""}
+    ${!orders.length ? `<tr><td class="muted">還沒有資料</td></tr>` : ""}</table></div>`;
+
+  h += `<div class="card"><div class="row between"><h2 style="margin:0">🧾 每個人的訂單</h2><button class="btn ghost sm" data-act="refresh">重新整理</button></div>`;
+  if(!orders.length) h += `<p class="muted">還沒有人點餐。</p>`;
+  [...orders].sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name)).forEach(o => {
+    const p = o.pay;
+    const tag = p.confirmed ? { cls:"t-ok", label:p.method === "cash" ? "現金・已點收" : "匯款・已對帳" }
+      : p.method === "transfer" ? { cls:"t-warn", label:`匯款待對帳（後五碼 ${p.last5}）` }
+      : p.method === "later" ? { cls:"t-bad", label:"⏳ 還沒付款（晚點付現金）" } : { cls:"t-info", label:p.note };
+    h += `<div class="person"><div class="row between"><b>${esc(o.name)}</b><b>${money(o.amount)}</b></div>
+      <div class="items">${esc(linesText(o.items))}${o.note ? "｜" + esc(o.note) : ""}</div>
+      <div class="row between wrap" style="margin-top:6px"><span class="tag ${tag.cls}">${esc(tag.label)}</span><span class="row">
+      ${p.confirmed ? `<button class="btn ghost sm" data-act="conf" data-id="${o.id}" data-v="0">取消確認</button>` : `<button class="btn sm" data-act="conf" data-id="${o.id}" data-v="1">${p.method === "transfer" ? "已對帳" : p.method === "later" ? "收到現金" : "已點收"}</button>`}
+      ${A.confirmDel === o.id ? `<button class="btn danger sm" data-act="delOrder" data-id="${o.id}">確定刪除</button>` : `<button class="x" data-act="askDel" data-id="${o.id}" title="刪除">×</button>`}
+      </span></div></div>`;
+  });
+  h += `<p class="muted" style="margin:10px 0 0">${s.bank ? "匯款：對照網銀的後五碼和金額後按「已對帳」。" : ""}現金：大家已備註與誰確認，清點繳款盒時再按「已點收」。<br>晚點付：對方把錢交給你時按「收到現金」；他自己按「我付了」登記的，會變成藍色的「已與某某確認繳款」。</p></div>`;
+
+  const pt = tr.filter(o => !o.pay.confirmed);
+  if(pt.length || later.length){
+    const t = `【便當繳款提醒】${s.title}\n`
+      + (later.length ? `\n還沒付款的同仁：\n${later.map(o => `・${o.name} ${money(o.amount)}`).join("\n")}\n請把錢交給 ${s.duty}（或放繳款盒），付完點點餐連結按「我付了」登記🙏\n` : "")
+      + (pt.length ? `\n匯款還沒對到帳，麻煩確認一下：\n${pt.map(o => `・${o.name} ${money(o.amount)}`).join("\n")}\n帳號：${s.bank.replace(/\n/g, " ")}\n` : "")
+      + `\n點餐連結👇\n${url}`;
+    h += `<div class="card"><h2>🔔 繳款提醒</h2><div class="copybox">${esc(t)}</div><button class="btn sm" data-act="copy" data-text="${esc(t)}">複製提醒，貼到 LINE</button></div>`;
+  }
+  h += `<p class="muted" style="text-align:center">每 30 秒自動更新・上次更新 ${A.loadedAt ? hm(A.loadedAt) : ""}</p>
+    <div class="card"><h3 style="margin-top:0">進階</h3><p class="muted" style="margin:0 0 8px">店家或照片設定錯了，可以刪除這團重新建立（已點的訂單會保留在試算表裡）。</p>
+    ${A.confirmDel === "session" ? (orders.length
+      ? `<div class="banner" style="margin:0">這團已經有 ${orders.length} 人點餐。確定要刪除的話，請輸入團名「<b>${esc(s.title)}</b>」：
+         <input type="text" id="delTitle" style="margin-top:8px" placeholder="${esc(s.title)}">
+         <div class="row" style="margin-top:8px"><button class="btn danger sm" data-act="delSession">確定刪除這團</button><button class="btn ghost sm" data-act="cancelDel">取消</button></div></div>`
+      : `<button class="btn danger sm" data-act="delSession">確定刪除這團</button> <button class="btn ghost sm" data-act="cancelDel">取消</button>`)
+      : `<button class="btn ghost sm" data-act="askDel" data-id="session">刪除這團</button>`}</div>
+    <p class="foot">${d.groups.length > 1 ? `<a href="#" data-act="backList">今天所有團</a>　·　` : `<a href="#" data-act="newGroup">＋ 開新團</a>　·　`}<a href="#">← 回點餐頁</a>　·　<a href="#" data-act="logout">登出</a></p>`;
+  setMain(h);
+}
+const rank = o => o.pay.confirmed ? 3 : o.pay.method === "later" ? 0 : o.pay.method === "transfer" ? 1 : 2;
+
+async function shrinkToDataURL(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const max = 1400, sc = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", 0.75);
+  }finally{ URL.revokeObjectURL(url); }
+}
+function openViewer(src){ $("#viewerImg").src = src; $("#viewer").classList.add("show"); $("#viewer").scrollTop = 0; document.body.style.overflow = "hidden"; }
+
+// =========================================================
+// 事件（委派）
+// =========================================================
+const resetPick = () => { O.form.bento = [{ name:"", price:"" }]; O.form.drinks = []; O.done = null; O.dup = false; O.editing = false; O.missing = -1; };
+const ACT = {
+  reload(){ route() === "admin" ? (A.data = null, render(), loadAdmin()) : (O.data = null, render(), loadOrder()); },
+  savePass(){ LS.set("bento_pass", $("#passIn").value.trim()); O.data = null; render(); loadOrder(); },
+  view(t){ const v = IMG[t.dataset.key]; if(Array.isArray(v)) openViewer(v[+t.dataset.i]); },
+  viewDraft(t){ openViewer(A.draft.stores[+t.dataset.idx].photos[+t.dataset.i]); },
+  retryImg(t, e){ const g = curGroup(); const st = g && g.stores.find(s => s.key === t.dataset.key); if(st) loadImages(st, true); },
+  addB(){ O.form.bento.push({ name:"", price:"" }); keepScroll(render); const ins = document.querySelectorAll('[data-in="bn"]'); ins[ins.length - 1].focus(); },
+  rmB(t){ O.form.bento.splice(+t.dataset.j, 1); if(!O.form.bento.length) O.form.bento.push({ name:"", price:"" }); keepScroll(render); },
+  addD(){ O.form.drinks.push({ name:"", price:"", sugar:"", ice:"" }); keepScroll(render); const ins = document.querySelectorAll('[data-in="dn"]'); ins[ins.length - 1].focus(); },
+  rmD(t){ O.form.drinks.splice(+t.dataset.j, 1); O.missing = -1; keepScroll(render); },
+  dsugar(t){ O.form.drinks[+t.dataset.j].sugar = t.dataset.v; keepScroll(render); },
+  dice(t){ O.form.drinks[+t.dataset.j].ice = t.dataset.v; keepScroll(render); },
+  method(t){ O.form.method = t.dataset.v; keepScroll(render); },
+  submit(){ submitOrder(false); },
+  payStart(){ O.paying = true; keepScroll(render); setTimeout(() => $("#payWith") && $("#payWith").focus()); },
+  payCancel(){ O.paying = false; keepScroll(render); },
+  async payReport(){
+    const g = curGroup(), w = $("#payWith").value.trim(), me = LS.get("bento_name", "");
+    if(!w){ $("#payWith").classList.add("err"); return toast("請填寫錢交給誰"); }
+    const r = await api("reportPay", { gid:g.gid, name:me, with:w });
+    O.paying = false;
+    if(r.ok){ delete g.unpaid[me]; toast("已登記：" + r.note); if(O.done && O.done.name === me) O.done.pay = { method:"cash", with:w, note:r.note }; }
+    else { toast(errMsg(r.error)); if(r.error === "no_unpaid_order") delete g.unpaid[me]; }
+    keepScroll(render);
+  },
+  submitReplace(){ submitOrder(true); },
+  cancelDup(){ O.dup = false; keepScroll(render); },
+  editMine(){
+    const o = O.done, f = newForm(false); f.name = o.name; f.note = o.note || ""; f.method = o.pay.method; f.last5 = o.pay.last5 || ""; f.with = o.pay.with || "";
+    f.bento = o.items.filter(l => (l.type || "bento") === "bento").map(l => ({ name:l.name, price:String(l.price) }));
+    if(!f.bento.length) f.bento = [{ name:"", price:"" }];
+    f.drinks = o.items.filter(l => l.type === "drink").map(l => { const [sugar, ice] = (l.opts || "").split("・"); return { name:l.name, price:String(l.price), sugar:sugar || "", ice:ice || "" }; });
+    O.form = f; O.done = null; O.editing = true; render();
+  },
+  another(){ O.form = newForm(false); O.done = null; O.editing = false; render(); setTimeout(() => $("#fName") && $("#fName").focus()); },
+  chooseGroup(t){ resetPick(); location.hash = "g-" + t.dataset.g; },
+  switchGroup(){ resetPick(); location.hash = ""; },
+
+  async adminLogin(){ const v = $("#adminIn").value.trim(); if(!v) return toast("請輸入密碼"); LS.set("bento_admin", v); A.loginErr = ""; A.loggingIn = true; render(); await loadAdmin(); },
+  logout(){ LS.del("bento_admin"); A.authed = false; A.data = null; A.gid = null; A.creating = false; render(); },
+  shift(t){ A.draft.shift = t.dataset.v; keepScroll(render); },
+  addDrink(){ A.draft.stores.push(newStore("drink")); keepScroll(render); },
+  rmStore(t){ A.draft.stores.splice(+t.dataset.idx, 1); keepScroll(render); },
+  rmPhoto(t){ const st = A.draft.stores[+t.dataset.idx]; st.photos.splice(+t.dataset.j, 1); st.changed = true; keepScroll(render); },
+  async create(){
+    const d = A.draft;
+    if(!d.duty.trim()) return toast("請填寫你的名字");
+    for(const st of d.stores){ if(!st.name.trim()) return toast(`請填寫${st.type === "drink" ? "飲料" : "便當"}店名`); if(st.loading) return toast("照片還在載入，請稍等"); }
+    if(d.transfer && !d.bank.trim()) return toast("請填寫收款帳號，或取消「開放匯款」");
+    A.busy = true; keepScroll(render);
+    const r = await api("createSession", { title:draftTitle(d), duty:d.duty.trim(), bank:d.transfer ? d.bank.trim() : "",
+      stores:d.stores.map(st => ({ type:st.type, name:st.name.trim(), phone:st.phone, deadline:st.deadline, photos:st.changed ? st.photos : null })) });
+    A.busy = false;
+    if(r.ok){
+      LS.set("bento_duty", d.duty.trim()); LS.set("bento_extra", norm(d.extra)); LS.set("bento_transfer", d.transfer); if(d.transfer) LS.set("bento_bank", d.bank.trim());
+      LS.set("bento_mygroup", { date:A.data.date, gid:r.gid });
+      d.stores.forEach(st => { if(st.changed) IMG[st.type + ":" + st.name.trim()] = st.photos.slice(); });
+      A.draft = null; A.creating = false; A.gid = r.gid; toast("點餐頁已產生！把公告貼到 LINE 群組吧"); A.data = null; render(); loadAdmin();
+    }else { toast(errMsg(r.error)); keepScroll(render); }
+  },
+  copy(t){ copy(t.dataset.text); },
+  editDl(t){ A.editDl = t.dataset.s; keepScroll(render); },
+  cancelDl(){ A.editDl = null; keepScroll(render); },
+  async saveDl(t){ const v = $("#dlIn").value; const r = await api("updateDeadline", { gid:A.gid, storeId:t.dataset.s, deadline:v }); A.editDl = null; toast(r.ok ? "已更新截止時間" : errMsg(r.error)); loadAdmin(true); },
+  async conf(t){
+    const g = adminGroup(), o = g.orders.find(x => x.id === t.dataset.id), v = t.dataset.v === "1";
+    if(o){ if(v && o.pay.method === "later") o.pay = { ...o.pay, method:"cash", with:g.duty, note:`已與${g.duty}確認繳款${o.amount}元` }; o.pay.confirmed = v; }
+    keepScroll(render);
+    const r = await api("setConfirmed", { id:t.dataset.id, confirmed:v, by:g.duty }); if(!r.ok){ toast(errMsg(r.error)); loadAdmin(true); } },
+  askDel(t){ A.confirmDel = t.dataset.id; keepScroll(render); },
+  cancelDel(){ A.confirmDel = null; keepScroll(render); },
+  async delOrder(t){ A.confirmDel = null; const r = await api("deleteOrder", { id:t.dataset.id }); toast(r.ok ? "已刪除" : errMsg(r.error)); loadAdmin(true); },
+  async delSession(){
+    const inp = $("#delTitle"), confirmTitle = inp ? inp.value.trim() : "";
+    if(inp && confirmTitle !== adminGroup().title){ inp.classList.add("err"); return toast("團名不對，請再確認一次"); }
+    const r = await api("deleteSession", { gid:A.gid, confirmTitle });
+    if(!r.ok) return toast(errMsg(r.error));
+    A.confirmDel = null; toast("已刪除這團"); A.gid = null; A.data = null; render(); loadAdmin();
+  },
+  openGroup(t){ A.gid = t.dataset.g; render(); window.scrollTo(0, 0); },
+  backList(){ A.gid = null; A.editDl = null; A.confirmDel = null; render(); window.scrollTo(0, 0); },
+  newGroup(){ A.creating = true; A.draft = null; A.gid = null; render(); window.scrollTo(0, 0); },
+  cancelCreate(){ A.creating = false; A.draft = null; render(); window.scrollTo(0, 0); },
+  refresh(){ loadAdmin(true).then(() => toast("已更新")); }
+};
+const IN = {
+  name(t){ O.form.name = t.value; O.dup = false; t.classList.remove("err"); const g = curGroup(), h = $("#nameHint"); if(h && g) h.innerHTML = nameHintText(g); },
+  bn(t){ O.form.bento[+t.dataset.j].name = t.value; updateTotal(); },
+  bp(t){ O.form.bento[+t.dataset.j].price = t.value; updateTotal(); },
+  dn(t){ O.form.drinks[+t.dataset.j].name = t.value; updateTotal(); },
+  dp(t){ O.form.drinks[+t.dataset.j].price = t.value; updateTotal(); },
+  note(t){ O.form.note = t.value; },
+  last5(t){ t.value = t.value.replace(/\D/g, ""); O.form.last5 = t.value; },
+  with(t){ O.form.with = t.value; updateTotal(); },
+  st(t){ A.draft.stores[+t.dataset.idx][t.dataset.k] = t.value; },
+  duty(t){ A.draft.duty = t.value; },
+  extra(t){ A.draft.extra = t.value; const p = $("#titlePrev"); if(p) p.textContent = draftTitle(A.draft) || "（負責人名字）團"; },
+  bank(t){ A.draft.bank = t.value; }
+};
+const CH = {
+  async photo(t){
+    const st = A.draft.stores[+t.dataset.idx], files = [...t.files].slice(0, 4 - st.photos.length);
+    if(!files.length) return;
+    st.msg = "處理照片中…"; keepScroll(render);
+    for(const f of files){ try{ st.photos.push(await shrinkToDataURL(f)); st.changed = true; }catch(e){ toast("有一張照片讀不到，請換一張"); } }
+    st.msg = ""; keepScroll(render);
+  },
+  transfer(t){ A.draft.transfer = t.checked; keepScroll(render); },
+  async pickSaved(t){
+    const st = A.draft.stores[+t.dataset.idx];
+    if(t.value === ""){ st.name = ""; st.phone = ""; st.photos = []; st.changed = false; st.msg = ""; return keepScroll(render); }
+    const saved = (A.data.stores || []).filter(x => x.type === st.type)[+t.value]; if(!saved) return;
+    st.name = saved.name; st.phone = saved.phone || ""; st.photos = []; st.changed = false; st.msg = "";
+    if(saved.photos){
+      st.loading = true; keepScroll(render);
+      const r = await api("getImages", { key:saved.key });
+      st.loading = false; st.photos = r.ok ? r.photos : [];
+      st.msg = r.ok ? `已帶入「${saved.name}」上次的菜單照片。菜單有換的話，刪掉舊照片再拍新的。` : "上次的照片載入失敗，可以重新拍一張。";
+      if(!r.ok) st.changed = true;
+    }
+    keepScroll(render);
+  }
+};
+const main = $("#main");
+main.addEventListener("click", e => { const t = e.target.closest("[data-act]"); if(!t || t.disabled) return; const fn = ACT[t.dataset.act]; if(fn){ if(t.tagName === "A") e.preventDefault(); fn(t, e); } });
+main.addEventListener("input", e => { const t = e.target; if(t.dataset.in && IN[t.dataset.in]) IN[t.dataset.in](t, e); });
+main.addEventListener("change", e => { const t = e.target; if(t.dataset.ch && CH[t.dataset.ch]) CH[t.dataset.ch](t, e); });
+main.addEventListener("keydown", e => { if(e.key === "Enter"){ if(e.target.id === "adminIn") ACT.adminLogin(); if(e.target.id === "passIn") ACT.savePass(); } });
+
+// =========================================================
+// 路由與啟動
+// =========================================================
+const route = () => location.hash === "#admin" ? "admin" : "order";
+function render(){ route() === "admin" ? renderAdmin() : renderOrder(); }
+function start(){
+  window.scrollTo(0, 0); render();
+  if(route() === "admin"){ if(LS.get("bento_admin", "")) loadAdmin(); else { warmUp(); render(); } }
+  else loadOrder();
+}
+window.addEventListener("hashchange", start);
+setInterval(() => { if(route() === "admin" && A.authed && A.data && A.data.ok && !A.creating && !A.editDl && !A.confirmDel && !document.hidden) loadAdmin(true); }, 30000);
+
+if(DEMO){
+  $("#demoBar").classList.remove("hidden");
+  $("#demoBar").addEventListener("click", e => {
+    const b = e.target.closest("[data-demo]"); if(!b) return;
+    const a = b.dataset.demo;
+    const resetAll = () => { O.data = null; O.done = null; O.form = newForm(true); O.editing = false; A.data = null; A.draft = null; A.gid = null; A.creating = false; };
+    if(a === "order"){ location.hash = ""; }
+    else if(a === "admin"){ location.hash = "admin"; }
+    else if(a === "next"){ Mock.load().offset++; Mock.save(); resetAll(); toast(`已切換到隔天：${fmtDate(Mock.today())}`); start(); }
+    else if(a === "clear"){ Mock.db = { offset:0, groups:[], orders:[], stores:[] }; Mock.images = {}; Mock.save(); ["bento_name","bento_last5","bento_duty","bento_bank","bento_method","bento_extra","bento_mygroup","bento_transfer"].forEach(LS.del); for(const k in IMG) delete IMG[k]; resetAll(); toast("示範資料已清除"); start(); }
+  });
+}
+start();
+</script>
+</body>
+</html>
